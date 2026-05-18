@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+context_dir="${1:-${BUILD_CONTEXT:-$PWD}}"
+image_name="${2:-${IMAGE_NAME:-$(basename "$context_dir"}}"
+image_tag="${3:-${IMAGE_TAG:-latest}}"
+dockerfile_path="${4:-${DOCKERFILE_PATH:-Dockerfile}}"
+registry_push="${REGISTRY_PUSH:-${REGISTRY:-registry.registry.svc.cluster:5000}}"
+registry_pull="${REGISTRY_PULL:?REGISTRY_PULL is required}"
+buildkit_addr="${BUILDKIT_HOST:?BUILDKIT_HOST is required}"
+
+if [[ ! -d "$context_dir" ]]; then
+  echo "Build context does not exist: $context_dir" >&2
+  exit 1
+fi
+
+if [[ "$dockerfile_path" != /* ]]; then
+  dockerfile_path="$context_dir/$dockerfile_path"
+fi
+
+if [[ ! -f "$dockerfile_path" ]]; then
+  echo "Dockerfile does not exist: $dockerfile_path" >&2
+  exit 1
+fi
+
+push_image="${registry_push}/${image_name}:${image_tag}"
+pull_image="${registry_pull}/${image_name}:${image_tag}"
+
+mkdir -p "/tmp/buildkit/.docker"
+
+export HOME="/tmp/buildkit"
+export DOCKER_CONFIG="/tmp/buildkit/.docker"
+
+if ! buildctl --addr "$buildkit_addr" debug workers >/dev/null 2>&1; then
+  echo "BuildKit is not reachable at $buildkit_addr" >&2
+  exit 1
+fi
+
+buildctl --addr "$buildkit_addr" build \
+  --frontend dockerfile.v0 \
+  --local context="$context_dir" \
+  --local dockerfile="$(dirname "$dockerfile_path")" \
+  --opt filename="$(basename "$dockerfile_path")" \
+  --output "type=image,name=${push_image},push=true,registry.insecure=true"
+
+echo "Pushed image: $push_image"
+echo "Cluster pull reference: $pull_image"

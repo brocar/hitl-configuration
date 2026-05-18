@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+workloads_namespace="${WORKLOADS_NAMESPACE:?WORKLOADS_NAMESPACE is required}"
+
+exec kubectl -n "$workloads_namespace" "$@"
