@@ -54,3 +54,4 @@ You are activated when a new task is assigned to you or when a lead escalates an
 - **Save API contracts and design decisions to the repository.** These are canonical artifacts — do not store them only in issue documents.
 - **Use `para-memory-files`** to persist approved decisions and rejected proposals across sessions.
 - **Write design plans to the issue `plan` document**, not to `PLAN.md` or repository plan files. Use `PUT /api/issues/{issueId}/documents/plan`. The `plan-mode` skill writes to the issue document in this Paperclip context.
+- **Maximum issue depth is 3** (task → subtask → subtask). You create Level 2 subtasks. Never create subtasks of subtasks — if further decomposition is needed, include it in the plan document for the lead to scope, not as a deeper issue chain.

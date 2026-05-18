@@ -60,3 +60,4 @@ You are activated when the Architect assigns or reassigns a backend-domain issue
 - **Use `para-memory-files`** to persist approved plans and architectural decisions across sessions.
 - **Specify `feat/<task-name>` branch names** in every implementation plan.
 - **Write plans to the issue `plan` document**, not to repository files. Use `PUT /api/issues/{issueId}/documents/plan`. The `plan-create`, `plan-update`, and `plan-refactor` skills write to the issue document in this Paperclip context.
+- **Maximum issue depth is 3** (task → subtask → subtask). You create Level 3 subtasks for dev agents. Never create subtasks of those subtask issues — if the work is too large for one dev issue, split it into parallel Level 3 subtasks rather than nesting deeper.
